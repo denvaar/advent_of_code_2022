@@ -1,0 +1,36 @@
+To run decode the script:
+
+base64 -d encoded_solution -o solution
+chmod +x solution
+
+To run the script:
+
+./solution
+
+
+
+:g/\d/-1j			:g global mode, which lets you execute a command
+				    against matching lines (see :help global)
+				\d to match numbers
+				-1j is the :join ex command (see :help :j) with a
+				    range indicating the preceeding line (I think?)
+
+:%s/ /+/g			global find and replace to replace " " with "+"
+
+0qqc$<C-r>=<C-r>"<CR><ESC>k0q	0 moves to front of the line
+				qq begins recording a macro
+				c$ removes all text on the line into " register
+				<C-r>= enters the expression register
+				<C-r>" paste from " register
+				<CR><ESC> carriage return and escape key
+				k0 moves up one line and puts cursor at beginning
+				q stop recording macro
+
+:%norm @q		        run the macro on every line
+
+:%!sort -nr		        use the bash `sort` command (see man sort) against all lines
+
+jdGISOLUTION: <ESC>	        jdG move down a line, then delete until end of file
+			        I enters insert mode at the beginning of the line (then type "SOLUTION: ")
+
+			        <ESC> to go back to normal mode
