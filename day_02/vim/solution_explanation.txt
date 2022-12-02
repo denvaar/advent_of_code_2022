@@ -1,0 +1,45 @@
+Decode the script:
+
+base64 -d encoded_solution -o solution
+chmod +x solution
+
+Run it:
+
+./solution
+
+
+
+:%s/X/1/g				Replace all X's with 1 throughout file.
+
+:%s/Y/2/g				Replace all Y's with 2 throughout file.
+
+:%s/Z/3/g				Replace all Z's with 3 throughout file.
+
+:%s/C 1/7/g				Replace lines that are "C 1" with 7 (because 6 + 1).
+
+:%s/A 2/8/g				Replace lines that are "A 2" with 8 (because 6 + 2).
+
+:%s/B 3/9/g				Replace lines that are "B 3" with 9 (because 6 + 3).
+
+:%s/A 1/4/g				You get the idea...
+
+:%s/B 2/5/g				...
+
+:%s/C 3/6/g				...
+
+:%s/[ABC] \(\d\)/\1/g			The rest of the lines are losses, so replace any lines that
+					    are A or B or C, followed by a space, and then a number.
+					    Use a capture group to capture the number and replace those
+					    lines with just the number.
+
+:norm vapJ				Select everything and move to one line (J).
+
+:%s/ /+/g				Replace all spaces with "+" to set up for the expression register.
+
+0					Ensure cursor is at the line start.
+c$					Clear all text and put in the default register (").
+<C-r>=<C-r>"				Enter expression register and paste contents of default register.
+<CR>					Hit enter key to sum up values in expression register.
+<C-o>I					Ctrl-o + I to jump to the start of the line. (Ctrl-o lets you run
+					    just one normal-mode command while in insert mode.
+SOLUTION: <ESC> 			Type "SOLUTION: " and Esc key to return to normal mode
