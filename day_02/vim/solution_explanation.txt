@@ -32,7 +32,7 @@ Run it:
 					    Use a capture group to capture the number and replace those
 					    lines with just the number.
 
-:norm vapJ				Select everything and move to one line (J).
+vapJ					Select everything (vap) and move to one line (J).
 
 :%s/ /+/g				Replace all spaces with "+" to set up for the expression register.
 
@@ -41,5 +41,5 @@ c$					Clear all text and put in the default register (").
 <C-r>=<C-r>"				Enter expression register and paste contents of default register.
 <CR>					Hit enter key to sum up values in expression register.
 <C-o>I					Ctrl-o + I to jump to the start of the line. (Ctrl-o lets you run
-					    just one normal-mode command while in insert mode.
+					    just one normal-mode command while in insert mode.)
 SOLUTION: <ESC> 			Type "SOLUTION: " and Esc key to return to normal mode
