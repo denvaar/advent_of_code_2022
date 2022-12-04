@@ -1,0 +1,68 @@
+Decode the script:
+
+base64 -d encoded_solution -o solution
+chmod +x solution
+
+Run the script:
+
+./solution
+
+
+I<C-r>=(line('$')/3)-1<CR><ESC>			I to enter insert mode at beginning of line.
+						<C-r>= to enter expression register.
+						(line('$')/3)-1 to divide the number of lines in the file by 3 and subtract one.
+
+l"ad^qqma:.,.+2s/\(\w\)/\1\r/g			l to move cursor right once.
+						"ad^ to delete from cursor position until the beginning of line. The contents go to the named register, a.
+						    Now we know how many times to run the macro that we're about to record.
+						qq begin recording a macro into q register.
+						ma to set a mark where the cursor is.
+						:.,.+2s/\(\w\)/\1\r/g is a search and replace that includes the current line, plus the two next.
+						    Essentially move each character to it's own line.
+
+'avip:!sort					'a to move cursor back to the mark.
+						vip to visually select the block of text.
+						:!sort to execute the bash sort command on selected lines.
+
+vip:!uniq					vip to visually select block of text
+						:!uniq to execute the back uniq command.
+
+}jvip:!sort					}j to move to the next block of text then down one line.
+						vip:!sort (already explained this).
+vip:!uniq					vip:!uniq (already explained this).
+
+{Jvip:!sort					{J to move to the preceeding block of text, then fold the empty line so it's now one block of text.
+						:!sort (already exp. this).
+
+vip:!uniq -d					The -d leaves only duplicate lines.
+
+}jvip:!sort					(already explained this).
+
+vip:!uniq					(already explained this).
+
+{Jvip:!sort					(already explained this).
+
+vip:!uniq -d					(already explained this).
+
+}jq:exe "norm <C-r>a@q"<CR>			}j to move to the next block of text and down one more line.
+						q to stop recording macro.
+						:exe "norm <C-r>a@q"<CR> to do a :norm command that takes the value in register 'a' and uses it to repeat the q macro that many times.
+						    Basically a loop of all the above sort's and uniq's.
+
+:g/^$/d						Remove all empty lines in the file
+
+:%s/[A-Z]/\=char2nr(submatch(0))-65+27/g	:%s/[A-Z] means find all uppercase letters.
+						/\= is to use expressions as the replacement value for the match.
+						char2nr is used to get the ascii/codepoint value of a character.
+						submatch(0) is to reference whatever character is being matched on.
+						-65+27 just some math to get the right numbers.
+						/g is to make the find & replace global.
+
+:%s/[a-z]/\=char2nr(submatch(0))-97+1/g		Same as above, but with lowecase letters and different math.
+						    I guess I could have done this with one line and used two match groups.
+
+vipJ:s/ /+/g					vipJ to select block of text (all the numbers for each rucksack.
+						:s/ /+/g to globally replace any spaces with "+". This is to set up for using the expression register.
+
+c$<C-r>=<C-r>"<CR><ESC>				c$ to clear the chuck of text into default register.
+						<C-r>=<C-r>"<CR><ESC> to paste the big summation of numbers into expression register and evaluate it. Output goes to screen.
