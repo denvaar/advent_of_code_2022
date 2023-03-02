@@ -1,0 +1,120 @@
+To run decode the script:
+
+base64 -d encoded_solution -o solution
+chmod +x solution
+
+To run the script:
+
+./solution
+
+
+:%s/[\[\]]/ /g<cr>    :%s substitute across entire buffer
+                      /[\[\]] match [ or ]
+                      /  replace with a space
+                      /g across entire lines
+
+ggV7j:g/^/move 0<cr>  gg move to the top of buffer
+                      V enter visual line mode
+                      7j move cursor down 7 times
+                      :g global command
+                      /^ match the first non-blank character of the line
+                      /move 0 apply the move command to each match. This effectively reverses the order of the selected lines.
+
+gg8jdd:%s/^ //<cr>    gg move to the top of buffer
+                      8j move down 8 lines
+                      dd delete line
+                      :%s substitute across entire buffer
+                      /^  match lines with a space at the beginning
+                      / replace with nothing
+
+ggmaO<esc>            gg move to top of buffer
+                      ma set a mark (identified by "a")
+                      O insert new line above cursor and enter insert mode.
+                      <esc> Leave insert mode
+
+qqyy7Pmb'a            qq begin recording a macro into "q"
+                      yy yank line under cursor
+                      7P paste it 7 times
+                      mb set a mark (identified by "b")
+                      'a move cursor to location of mark "a"
+
+<c-v>7jx'bpvipgJ<cr>  <c-v> enter visual block mode
+                      7j move down 7 lines
+                      x delete (the block selection) into unnamed register
+                      'b move cursor to location of mark "b"
+                      p paste from unnamed register
+                      vip visually select "inner" paragraph
+                      gJ join lines without putting any spaces between
+                      <cr> enter
+
+O<cr>                 O insert new line above cursor, move cursor to it, enter insert mode
+                      <cr> enter
+
+<esc>q9@q             <esc> escape (to leave insert mode)
+                      q end macro recording
+                      9@q replay the macro 9 times
+
+ggv'a                 gg move to top of the buffer
+                      v start visual mode
+                      'a move cursor to location of mark "a"
+
+:g/^$/d _<cr>         :g global command
+                      /^$ match blank lines
+                      /d delete matching lines
+                      _ don't clobbering register
+                      <cr> enter
+
+/move<cr>             / enter buffer search prompt
+                      move (literal, eg. search for "move")
+                      <cr> enter
+
+qq0w"ayiwdd@aP@ajq    qq begin recording macro
+                      0w Ensure cursor is at beginning of line, then move forward a word.
+                      "ayiw yank "inner" word (into the named register "a")
+                      dd delete line
+                      @aP put the contents of unnamed register @a times, where @a is the contents of register "a"
+                      j move down
+                      q stop recording macro
+
+:exe "norm " . (line('$') - line('.')) . "@q"<cr>
+                      
+                      get the count of lines from current line to end of buffer and execute a normal command which replays the macro that many times.
+
+:%s/move \d\+ from \(\d\+\) to \(\d\+\)/:\1\r$x:\2\r$p\r<cr>
+
+                      %s substitute command
+                      /move \d\+ match lines that begin with move followed by one or more digits...
+                      from \(\d\+\) ...followed by "from" then one or more digits. Use a match group to capture the digits...
+                      to \(\d\+\) ...followed by "to" then one or more digits. Use a match group to capture the digits...
+                      /:\1 replace with a ":" followed by the first capture group...
+                      \r$x ...followed by a new line, a "$" and an "x"...
+                      :\2\r$p\r<cr> ...followed by a ":" then the second capture group, then a new line, then a "$", then a p, finally a new line.
+
+gg}ddmaqqjdap         gg move top of buffer
+                      } move forward one paragraph
+                      dd delete line
+                      ma set a mark, identified by "a"
+                      qq begin recording a macro
+                      j move down
+                      dap delete "around" paragraph
+
+:exe 'norm @"'<cr>    execute a normal mode command that executes the contents of the unnamed register
+
+'aq9000@q             'a move to mark indicated by "a"
+                      q stop recording macro
+                      9000@q replay macro 9000 times (because I'm lazy to get the exact number)
+
+:g/\w$/norm nd^<esc>  :g global command
+                      /\w$ match last character from lines
+                      /norm apply normal mode command to matches.
+                      nd^ move to next match and delete until beginning of line (effectively leaving the last character of each line)
+                      <cr> enter
+
+:g/\w/%norm gJ        :g global command
+                      /\w match lines with a single character
+                      /%norm gJ apply normal mode command to use gJ to join matching lines without adding a space
+                      
+
+
+                      
+

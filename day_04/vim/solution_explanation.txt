@@ -1,0 +1,25 @@
+Decode the script:
+
+base64 -d encoded_solution -o solution
+chmod +x solution
+
+Run it:
+
+./solution
+
+:%s/\(\d\+\)-\(\d\+\),\(\d\+\)-\(\d\+\)/\=str2nr(submatch(1)) <= str2nr(submatch(3)) && str2nr(submatch(2)) >= str2nr(submatch(4)) || str2nr(submatch(3)) <= str2nr(submatch(1)) && str2nr(submatch(4)) >= str2nr(submatch(2))<cr>
+
+			substitute command using a match group for each of the four numbers.
+			replace using an expression instead of a value
+			
+
+:g/0/d _<cr>		global command to delete lines that are just a 0. The underscore prevents clobbering a register
+
+vapJ			visual select "around" paragraph and join all lines onto one
+
+:s/ /+/g<cr>		subsitute command to replace spaces with plus sign. Apply to more than just the first match on each line
+
+c$			clear entire line into unnamed register
+<c-r>=<c-r>"<cr> 	enter the expression register and paste contents from the unnamed register.
+
+<esc>			exit insert mode into normal mode
