@@ -1,0 +1,63 @@
+To replicate the solution:
+
+$ base64 -d encoded_solution -o solution
+
+(Why encoded? Because there's control characters that are non-printable otherwise.)
+
+$ vi input.txt -s solution
+
+------
+
+qqyypxq
+
+    qq to begin recording a macro.
+    yy to yank the line under cursor.
+    p to paste it.
+    x to chop off the the first character.
+    q to quit recording.
+
+:exe "norm " . col('$') . "@q"
+
+    Use the execute command to be able to interpolate the
+    value of the col function. This is the same as if I
+    wanted to replay a macro 50 times, and typed in 50@q
+    in Normal mode.
+
+:%norm 4ld$
+
+    % to apply to the entire buffer.
+    norm for "normal" command, which lets you perform actions
+    	as if in Normal mode, but entered via command-line.
+    4l to move the cursor 4 cells to the right.
+    d$ to delete until the end of the line.
+
+/^\%(.*\(.\).*\1\)\@!.*$
+
+    / to begin a buffer search.
+    ^ to assert the beginning of the line.
+    \%(...\) to group together atoms without capturing.
+    .* zero or more of anything.
+    \(...\) to create a match group.
+    . basically anything.
+    .* zero or more of anything.
+    \1 to reference whatever it was that was captured.
+    \@! to invert the match. Anything NOT matching the preceeding
+    	atom is now considered "the match".
+    .* zero or more of anything.
+    $ to assert the end of the line.
+
+c$<c-r>=len("<c-r>"")+line('.')-1
+
+    c$ to "clear" until the end of the line (entering Insert mode).
+    <c-r>= to enter the expr. register.
+    len(...) to get the length of a string.
+    <c-r>" to paste contents of the unnamed register.
+    line('.') to get the current line number that cursor is on.
+
+<esc>:g/^\d\@!/d _
+
+    <esc> to leave Insert mode.
+    :g/ to begin a global command.
+    ^\d\@! to match any lines NOT beginning with a digit.
+    /d _ to delete matching lines into a black hole.
+
