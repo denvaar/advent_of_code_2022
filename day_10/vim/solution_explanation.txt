@@ -1,0 +1,76 @@
+To replicate the solution:
+
+$ base64 -d encoded_solution -o solution
+
+(Why encoded? Because there's control characters that are non-printable otherwise.)
+
+$ vi input.txt -s solution
+
+----
+
+:let @b = 20
+
+    Set the "b" register to 20.
+
+:%s/addx.*/noop\r&
+
+    Substitute command to match any lines that have "addx" (followed by anything) with "noop", a carriage return, and then whatever the line had originally.
+    This effectively puts a line that says "noop" right before any line containing "addx".
+    & is the same as \0, which is how to reference the match from the first part of the substitute command.
+
+:%s/ \zs\d/+&
+
+    Substitute command to put a plus sign in front of any digits which are preceeded by a space.
+
+qq
+
+    Begin recording a macro using the "q" register
+
+:let @a = ''
+
+    Clear the "a" register.
+
+:1,<c-R>b-s/[+-]\d\+/\=setreg('A', submatch(0))/n
+
+    1,<c-R>b- is a range from the first line to the 20th line, and the "-" makes it so that the 20th line itself is not included. It's 20 because <c-R>b spits out a 20, which is from the "b" register.
+    s/[+-]\d\+/ Beginning of a substitute command. Match one or more digits as well as a + or - sign that comes before it.
+    \= Substitute with an expression.
+    setreg('A', submatch(0)) will set the "a" register with whatever was matched. Capital "a" is used so that contents are appended to the register rather than replaced.
+    /n The "n" flag makes it so the substitute command doesn't actually change the contents of the buffer.
+
+Go<c-R>=(<c-R>a+1)*<c-R>b
+
+    G to move cursor to last line of the buffer.
+    o to enter insert mode on the line below the cursor.
+    <c-R>= to call up the expression register.
+    ( just a literal character.
+    <c-R>a to insert the contents of the "a" register.
+    +1)* just literal characters.
+    <c-R>b spits out the value in the "b" register.
+
+:let @b = @b + 40
+
+    Increment value in "b" register by 40.
+
+q
+
+    Stop recording the macro.
+
+5@q
+
+    Replay the macro 5 times.
+
+:1,$-6d
+
+    Delete all lines in the buffer, except the last 6.
+
+:%s/\n\($\)\@!/+
+
+    Substitute command that is used to essentially join all lines onto one, with a "+" sign in between each one (except the very last).
+    Honestly I'm not sure why \n\($\)\@! actually works to exclude the final line from matching...
+
+c$<c-R>=<c-R>"<cr><esc><esc>
+
+    c$ Clear until the end of the line. Contents end up in the unnamed register, and mode changes to INSERT.
+    <c-R>= Enter the expression register.
+    <c-R>" Place contents of the unnamed register into expression register.
