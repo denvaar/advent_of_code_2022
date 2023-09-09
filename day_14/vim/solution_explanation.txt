@@ -1,0 +1,182 @@
+To replicate the solution:
+
+$ base64 -d encoded_solution -o solution
+
+(Why encoded? Because there's control characters that are non-printable otherwise.)
+
+$ vi input.txt -s solution
+
+- To improve speed, remove the `:redraw<CR>` command, and remove the `zz`.
+- To see the action happening in slow-mo, add `:set writedelay=2`
+  after the first tab is closed.
+
+----
+
+:%sort
+
+    - Sort all lines in the file.
+
+dd
+
+    - Delete a line.
+
+:g/\(^.\+\)\n\1\+/d _
+
+    - It's a global command (see :h :g) used to delete duplicate
+      lines.
+    - \(^.\+\)\n\1\+ is saying: "match a line with one or more of
+      anything, and capture it so that it can be referenced later
+      on", and then \1\+ is used to reference whatever was matched
+      already one or more times.
+    - d _ to delete all the matches into a black hole (don't put
+      it in a register).
+    - Overall, this will get rid of duplicated lines throughout a
+      file, but it only works if the lines are sorted.
+
+:%s/ \d\+,\d\+ /&->&/g
+
+    - Substitute command used to duplicate the match.
+    - % is a shortcut for a range that says, "The whole buffer".
+    - \d\+ means one or more digits.
+    - & inside the replacement portion of :substitute is a
+      reference to the entire matched portion (AKA \0).
+    - The g flag makes the match apply to more than just the first
+      match on each line.
+
+:%s/\n/\r\r
+
+    - Substitute command used to add an empty line after each line.
+    - You must use \n within the match portion, but \r within the
+      replacement portion.
+
+:tabed drawing
+:set nowrap
+:set nu
+:set ve=all
+
+    - Create a new tab named, "drawing".
+    - :set nowrap to make it so that long lines don't wrap, but
+      instead have the screen scroll to the right.
+    - :set nu to turn on line numbers.
+    - :set ve=all to make it so that the cursor can go where there
+      are no characters (See :h virtualedit).
+
+yy600Pgtgg0qq"ayiw2w"byiw2w"cyiw2w"dyiwgt:@b<CR>
+
+    - yy600P to create 600 empty lines.
+    - gt to switch to the other tab.
+    - gg to move to the top of the file.
+    - 0 to ensure cursor is at the beginning of the line.
+    - qq to begin recording a macro (into the named register q).
+    - "ayiw to yank the "inner word" into the named register, a
+      (see :h yank, :h iw).
+    - 2w to move two "words" to the right (see :h :word).
+    - "byiw same as before, but into the named register, b.
+    - "cyiw same as before, but into the named register, c.
+    - "dyiw same as before, but into the named register, d.
+    - gt to switch tabs.
+    - :@b<CR> to move the cursor to the line number specified by
+      the value in register b (<CR> means the ENTER key).
+
+@a|ma:@d<CR>
+
+    - @a| to move the cursor to the column specified by the value
+      stored in register a.
+    - ma to set a mark, identified by a.
+    - :@d<CR> to move the cursor to the line number specified by
+      the value in register d (<CR> means the ENTER key).
+
+@c|<c-v>`arxgt2wq9999@q:q!<CR>gg500|ro
+
+    - @c| to move the cursor to the column specified by the value
+      stored in the register c.
+    - <c-v> to enter VISUAL BLOCK mode.
+    - `a to move the cursor to "a" mark. ` is used rather than '
+      because ` will respect both column and row location.
+    - rx to replace replace the selected region with x's.
+    - gt to switch tabs.
+    - 2w to move two "words" forward".
+    - q to quit recording the macro.
+    - 9999@q to replay the macro 9999 times.
+    - :q!<CR> to close the current tab.
+    - gg to go to the top of the file.
+    - 500| to move the cursor to the 500th column.
+    - ro to write a "o" where the cursor is.
+
+qqmaj<c-v>"ayh<c-v>"by2l<c-v>"cy`a
+
+    - qq to begin recording a macro to the q register.
+    - ma to set a mark identified by "a".
+    - j to move the cursor down one row.
+    - <c-v>"ayh to enter VISUAL BLOCK mode and yank the selection
+      (a single character) into the "a" register, and then move
+      the cursor one column to the left.
+    - <c-v>"by2l to do the same thing as above, but into the "b"
+      register, and then move two columns to the right.
+    - <c-v>"cy`a ... same thing, but into the "c" register, and
+      then move the cursor back to the column and row where the
+      "a" mark was placed.
+
+:exe @a == ' ' ? 'norm r jroq@q' : @b == ' ' ? 'norm r jhroq@q' : @c == ' ' ? 'norm r jlroq@q' : 'norm qgg500|ro100@q'
+
+    - :exe to evaluate an expression. This expression is a nested
+      ternary in this case (see :h :exe, :h ternary).
+    - @a == ' ' ? 'norm r jroq@q' : ... is a ternary expression.
+      If the value in register "a" is an empty space, then the
+      norm command is executed, otherwise another ternary is
+      executed (see subsequent steps for explanation). "norm" is
+      used to execute normal mode commands (see :h norm). In this
+      case, r<space> runs first to replace the cell underneath the
+      cursor with a space. Next jroq will move the cursor down one
+      row, replace the cell with a "o", and then q stops recording
+      the macro. Finally @q will replay the macro once.
+    - @b == ' ' ? 'norm r jhroq@q' : ... is much like the first
+      ternary, but the normal command executes something slightly
+      different. jh moves the cursor down and left. ro replaces
+      the cell with an "o". q followed by @q stops recording the
+      macro, and immediately replays it once.
+    - Not going to explain the rest of the expression, but the
+      general idea is that most cases result in recursively
+      replaying the macro.
+    - norm qgg500|ro100@q is what stops the recursion.
+      An arbitrary number, 100, is used to replay the actions
+      enough times that the simulation can reach completion.
+
+?x<CR>
+
+    - Search for x's in the buffer (move the cursor to the last
+      instance found.
+
+Vgg
+
+    - V to enter VISUAL LINE mode.
+    - gg to go to the top of the file.
+
+:s/o//gn
+
+    - Substitute command to count the number of o's within the
+      current visual line selection.
+    - g makes the operation apply to more than just the first
+      match on each line.
+    - n is a flag that makes it so the action is only reported
+      as a message -- no changes to the buffer are made.
+
+dGi<c-r>=execute('1messages')<CR><ESC>
+
+    - dG to delete up until (and including) the last line.
+    - <c-r>= to enter the expression register.
+    - execute('1messages')<CR> to get the last message into the
+      current buffer. The last message should be the one that has
+      how many matches were found from the last substitute command.
+    - <ESC> to leave INSERT mode.
+
+:s/\(\d\+\) matches.*/\1
+
+    - Substitute command that is used to replace
+      "N matches on M lines" with just the N value.
+    - \(...\) is a capture group, so that the part inside can be
+      referenced in the replacement part of the :s command.
+
+
+
+
