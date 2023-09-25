@@ -9,6 +9,7 @@ $ vi input.txt -s solution
 - To improve speed, remove the `:redraw<CR>` command, and remove the `zz`.
 - To see the action happening in slow-mo, add `:set writedelay=2`
   after the first tab is closed.
+- This runs a lot better on Vi/Vim than NeoVim.
 
 ----
 
@@ -53,6 +54,7 @@ dd
 :set nowrap
 :set nu
 :set ve=all
+:set maxfuncdepth=500
 
     - Create a new tab named, "drawing".
     - :set nowrap to make it so that long lines don't wrap, but
@@ -60,11 +62,18 @@ dd
     - :set nu to turn on line numbers.
     - :set ve=all to make it so that the cursor can go where there
       are no characters (See :h virtualedit).
+    - :set maxfuncdepth=500 to prepare for a very recursive
+      macro. Vim will only let you go so deep by default.
 
-yy600Pgtgg0qq"ayiw2w"byiw2w"cyiw2w"dyiwgt:@b<CR>
+yy200PgtGdddd:nohl<CR>
 
-    - yy600P to create 600 empty lines.
+    - yy200P to create 200 empty lines.
     - gt to switch to the other tab.
+    - dddd to delete a a couple lines.
+    - :nohl to stop highlighting the matches.
+
+gg0qq"ayiw2w"byiw2w"cyiw2w"dyiwgt:@b<CR>
+
     - gg to move to the top of the file.
     - 0 to ensure cursor is at the beginning of the line.
     - qq to begin recording a macro (into the named register q).
@@ -86,7 +95,7 @@ yy600Pgtgg0qq"ayiw2w"byiw2w"cyiw2w"dyiwgt:@b<CR>
     - :@d<CR> to move the cursor to the line number specified by
       the value in register d (<CR> means the ENTER key).
 
-@c|<c-v>`arxgt2wq9999@q:q!<CR>gg500|ro
+@c|<c-v>`ar█gt2wq999@q:q!<CR>
 
     - @c| to move the cursor to the column specified by the value
       stored in the register c.
@@ -99,11 +108,24 @@ yy600Pgtgg0qq"ayiw2w"byiw2w"cyiw2w"dyiwgt:@b<CR>
     - q to quit recording the macro.
     - 9999@q to replay the macro 9999 times.
     - :q!<CR> to close the current tab.
+
+G?█<CR>
+
+    - G to move to the bottom of the file
+    - ?█ to search for the previous █ character.
+
+jdG
+
+    - j to move down.
+    - dG to delete until the end of the file
+
+gg500|ro
+
     - gg to go to the top of the file.
     - 500| to move the cursor to the 500th column.
     - ro to write a "o" where the cursor is.
 
-qqmaj<c-v>"ayh<c-v>"by2l<c-v>"cy`a
+qqqqqmaj<c-v>"ayh<c-v>"by2l<c-v>"cy`a:redraw<CR>
 
     - qq to begin recording a macro to the q register.
     - ma to set a mark identified by "a".
@@ -116,46 +138,42 @@ qqmaj<c-v>"ayh<c-v>"by2l<c-v>"cy`a
     - <c-v>"cy`a ... same thing, but into the "c" register, and
       then move the cursor back to the column and row where the
       "a" mark was placed.
+    - :redraw because NeoVim crashes without it.
 
-:exe @a == ' ' ? 'norm r jroq@q' : @b == ' ' ? 'norm r jhroq@q' : @c == ' ' ? 'norm r jlroq@q' : 'norm qgg500|ro100@q'
+zz
+
+    - zz to center the viewport on the cursor.
+
+:exe @a == ' ' ? 'norm r jro@q' : @b == ' ' ? 'norm r jhro@q' : @c == ' ' ? 'norm r jlro@q' : 'norm gg500|ro'
 
     - :exe to evaluate an expression. This expression is a nested
       ternary in this case (see :h :exe, :h ternary).
-    - @a == ' ' ? 'norm r jroq@q' : ... is a ternary expression.
+    - @a == ' ' ? 'norm r jro@q' : ... is a ternary expression.
       If the value in register "a" is an empty space, then the
       norm command is executed, otherwise another ternary is
       executed (see subsequent steps for explanation). "norm" is
       used to execute normal mode commands (see :h norm). In this
       case, r<space> runs first to replace the cell underneath the
       cursor with a space. Next jroq will move the cursor down one
-      row, replace the cell with a "o", and then q stops recording
-      the macro. Finally @q will replay the macro once.
-    - @b == ' ' ? 'norm r jhroq@q' : ... is much like the first
+      row, replace the cell with a "o". Finally @q will replay
+      the macro once.
+    - @b == ' ' ? 'norm r jhro@q' : ... is much like the first
       ternary, but the normal command executes something slightly
       different. jh moves the cursor down and left. ro replaces
-      the cell with an "o". q followed by @q stops recording the
-      macro, and immediately replays it once.
+      the cell with an "o". @q replays the macro.
     - Not going to explain the rest of the expression, but the
       general idea is that most cases result in recursively
       replaying the macro.
-    - norm qgg500|ro100@q is what stops the recursion.
-      An arbitrary number, 100, is used to replay the actions
-      enough times that the simulation can reach completion.
 
-?x<CR>
+q900@q
 
-    - Search for x's in the buffer (move the cursor to the last
-      instance found.
+    - q to stop recording.
+    - 900@q to replay the macro up to 900 times.
 
-Vgg
+:1,$-s/o//gn
 
-    - V to enter VISUAL LINE mode.
-    - gg to go to the top of the file.
-
-:s/o//gn
-
-    - Substitute command to count the number of o's within the
-      current visual line selection.
+    - Substitute command to count the number of o's from the top
+      of the file until the last line, minus one.
     - g makes the operation apply to more than just the first
       match on each line.
     - n is a flag that makes it so the action is only reported
@@ -177,6 +195,9 @@ dGi<c-r>=execute('1messages')<CR><ESC>
     - \(...\) is a capture group, so that the part inside can be
       referenced in the replacement part of the :s command.
 
+kdggd0
 
-
-
+    - k to move up.
+    - dgg to delete from the current position until the top of
+      the file.
+    - 0 to move to the start of the line.
