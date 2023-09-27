@@ -1,0 +1,67 @@
+To replicate the solution:
+
+$ base64 -d encoded_solution -o solution
+
+(Why encoded? Because there's control characters that are non-printable otherwise.)
+
+$ vi input.txt -s solution
+
+----
+
+:g/^$/d _<CR>
+
+    - Global command to match lines that have nothing on them
+      and then delete 'em (into a black hole).
+
+:g/root/mo 0<CR>
+
+    - Global command to match lines that have "root".
+    - mo 0 to move the matches (should be just one) to the
+      beginning of the buffer.
+
+ggj
+
+    - gg to move the cursor to the start of the buffer.
+    - j to move down one line.
+
+qqma"aywW"by$
+
+    - qq to begin recording a macro (into "q" register).
+    - ma to set a mark at the current cursor position.
+    - "ayw to yank a word into the "a" register.
+    - W to move the cursor forward (see :h W).
+    - "by$ to yank from the cursor position to the end of line.
+      The contents go into the "b" register.
+
+:%s#<c-r>a:\@!#(<c-r>b)#g<CR>
+
+    - Substitute command (using "#" as the delimiter, since
+      some of the patterns will include "/" -- the delimiter that
+      I would normally use.
+    - <c-r>a to paste the contents from the "a" register.
+    - :\@! to specify that the match should not include those
+      that are suffixed with a ":" character (see :h \@!).
+    - (<c-r>b) to paste in the contents from the "b" register,
+      wrapped inside some parentheses.
+    - g to match more than just the first match per line.
+
+'addq
+
+    - 'a to move cursor back to the mark that was set.
+    - dd to delete the line.
+    - q to stop recording the macro.
+
+:.,$normal @q<CR>
+
+    - Replay the macro for every line in the file starting from
+      the current line until the end.
+
+dWc$<c-r>=<c-r>"<CR><ESC><ESC>
+
+    - dW to delete a word.
+    - c$ to clear the remaining text on the line into the
+      unnamed register, as well as switch into INSERT mode.
+    - <c-r>= to enter the expression register.
+    - <c-r>"<CR> to paste the contents from the unnamed register.
+    - <ESC> to return to NORMAL mode.
+
